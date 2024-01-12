@@ -10,8 +10,6 @@
 #include <QShowEvent>
 #include <QHideEvent>
 #include <QLabel>
-#include "softkeyboard.h"
-#include "ui_softkeyboard.h"
 
 #include <QApplication>
 #include <QEvent>
@@ -21,15 +19,12 @@
 #include <QDateTime>
 #include <QStyle>
 
-#if XZSOFTKEYBOARD_DEBUG == 1
-    #define A_FILE      QString(__FILE__).split('/').last()
-    #define A_TIME      QDateTime::currentDateTime().toString ("hh:mm:ss")
-    #define QDEBUGT     qDebug() << QString("###INPUT %1 %2 %3:%4 ").arg(A_TIME).arg(A_FILE).arg(__FUNCTION__).arg(__LINE__)
-    #define QDEBUG      qDebug() << QString("###INPUT %1:%2 ").arg(A_FILE).arg(__LINE__)
-#else
-    #define QDEBUGT     QNoDebug()
-    #define QDEBUG      QNoDebug()
-#endif
+#include "softkeyboard.h"
+#include "ui_softkeyboard.h"
+
+#include "keyboard_pinyin.h"
+
+#include "CandidatesListWidget.h"
 
 //#include <QTime>
 //void static msecSleep(int msec)
@@ -43,6 +38,14 @@
 #define MAX_VISIBLE (8)
 
 XzSoftKeyboard* XzSoftKeyboard::g_keyboard = nullptr;
+XzSoftKeyboard* XzSoftKeyboard::getKeyboard()
+{
+    QDEBUGT;
+    if (g_keyboard==nullptr) {
+        g_keyboard = new XzSoftKeyboard;
+    }
+    return g_keyboard;
+}
 
 
 XzSoftKeyboard::XzSoftKeyboard(QWidget *parent) :
@@ -80,18 +83,16 @@ XzSoftKeyboard::XzSoftKeyboard(QWidget *parent) :
 
     init1();
 
+    xzKeyboardPinyin * pKPinYin = xzKeyboardPinyin::g(this);
+    connect(pKPinYin, SIGNAL(si_commit_text(const QString&)), this, SLOT(s_pinyin_commit_text(const QString&)));
+
+    CandidatesListWidget * wdgCdList = new CandidatesListWidget(this);
+    connect(pKPinYin, SIGNAL(si_show_list(const QStringList &)), wdgCdList, SLOT(setCandidatesList(const QStringList &)));
+    ui->verticalLayout_3->insertWidget(0, wdgCdList);
+
     connect(qApp, &QApplication::focusChanged, this, &XzSoftKeyboard::focusChangedSlot);
     qApp->installEventFilter( this );
 
-}
-
-XzSoftKeyboard* XzSoftKeyboard::getKeyboard()
-{
-    QDEBUGT;
-    if (g_keyboard==nullptr) {
-        g_keyboard = new XzSoftKeyboard;
-    }
-    return g_keyboard;
 }
 
 XzSoftKeyboard::~XzSoftKeyboard()
@@ -112,11 +113,6 @@ XzSoftKeyboard::~XzSoftKeyboard()
 //    connect(this, SIGNAL(changedOutSideTextSignal(QString, QString)), input_widget, SLOT(setTextSlot(QString, QString)));
 //    connect(this, SIGNAL(setDefaultColorSignal()), input_widget, SLOT( recvKeyBoardHideSlot()));
 //}
-
-
-
-
-
 
 
 void XzSoftKeyboard::hideEvent(QHideEvent *event)
@@ -457,24 +453,43 @@ void XzSoftKeyboard::DeleteTextFromCurFocusWt()
     }
 
     QKeyEvent keyPress(QEvent::KeyPress, Qt::Key_Backspace, Qt::NoModifier, QString());
-
     QApplication::sendEvent(cur_focus_wt_, &keyPress);
 }
 
 void XzSoftKeyboard::recKeyClicked(const QString &str)
 {
     QDEBUGT << str << str.contains(QRegExp("[a-z]")) << "is ch:" << mode_flag_map_[is_ch_mode] << cur_py_text_.isEmpty();
+    xzKeyboardPinyin * pKPY = xzKeyboardPinyin::g(this);
     if(str.size()==1) {
-        if( mode_flag_map_[is_ch_mode] && (str.contains(QRegExp("([a-z])")) || (!cur_py_text_.isEmpty())) ) { //正常输入拼音
-            cur_py_text_+=str;
-            //            ui->lb_display_text->setText(cur_py_text_);
+        bool bInPinyin = false;
+        do{
+            if( ! mode_flag_map_[is_ch_mode] ) break;
+            if( pKPY->surface().isEmpty() ){
+                if( !str.contains(QRegExp("([a-z])")) ) break;
+            }
+
+            if( ! str.contains(QRegExp("([a-z])")) ){
+                cur_py_text_ = "";
+                lb_display_text_->setText(cur_py_text_);
+                if( pKPY->total_num() > 0 ){
+                    QDEBUGT << "pinyin out zero :: " << pKPY->surface() << pKPY->candidateAt( 0 );
+                    InsertTextToCurFocusWt( pKPY->candidateAt( 0 ) );
+                }
+                else{
+                    QDEBUGT << "pinyin out surf:: " << pKPY->surface();
+                    InsertTextToCurFocusWt( pKPY->surface() );
+                }
+                pKPY->py_resetToIdleState();
+                break;
+            }
+            cur_py_text_ += str;
             lb_display_text_->setText(cur_py_text_);
-            //lb_display_text_->adjustSize();
-            cur_py_page_=-1;
-            showChinese(">>", getChineseListMap(cur_py_text_));
-            QDEBUGT << cur_py_text_;
-        }
-        else { //直接输出
+            uint32_t iKeyIn = str.at(0).toUpper().toLatin1();
+            pKPY->py_key_event(static_cast<Qt::Key>(iKeyIn), str, Qt::NoModifier);
+            bInPinyin = true;
+            break;
+        }while(false);
+        if( ! bInPinyin ){ //直接输出
             InsertTextToCurFocusWt(str);
             clearBuffer();
         }
@@ -485,13 +500,16 @@ void XzSoftKeyboard::recKeyClicked(const QString &str)
         }
         else if(str=="sw") { //中英文切换
             mode_flag_map_[is_ch_mode] = !mode_flag_map_[is_ch_mode];
+            pKPY->py_resetToIdleState();
             if(mode_flag_map_[is_ch_mode]) {
                 symbal_page_=ch0;
+                pKPY->set_to_pinyin( true );
             }
             else {
                 //ui->verticalLayout_2->removeWidget(lb_display_text_);
                 //lb_display_text_->setVisible( false );
                 symbal_page_=en0;
+                pKPY->set_to_pinyin( false );
             }
             //            QDEBUGT << "chinese"<<mode_flag_map_[is_ch_mode];
             setSymbolPage(symbal_page_);
@@ -501,12 +519,15 @@ void XzSoftKeyboard::recKeyClicked(const QString &str)
             showChinese(str, getChineseListMap(cur_py_text_));
         }
         else if(str=="BS") { //退格按钮
+            if( pKPY->isPinyinInput() ){
+                pKPY->py_key_event(Qt::Key_Backspace, QString(""), Qt::NoModifier);
+            }
             if(!cur_py_text_.isEmpty()) { //若处于中文输入状态
                 cur_py_text_.remove(cur_py_text_.size()-1, 1);
                 //                ui->lb_display_text->setText(cur_py_text_);
                 lb_display_text_->setText(cur_py_text_);
                 //lb_display_text_->adjustSize();
-                showChinese(">>", getChineseListMap(cur_py_text_));
+                //showChinese(">>", getChineseListMap(cur_py_text_));
             }
             else {
                 DeleteTextFromCurFocusWt();
@@ -516,20 +537,15 @@ void XzSoftKeyboard::recKeyClicked(const QString &str)
 
         }
         else if(str == "English" || str == "Chinese") { //空格按钮
-            if(!cur_py_text_.isEmpty()) { //若处于中文输入状态
-                cur_py_text_.append(" ");
-                //                ui->lb_display_text->setText(cur_py_text_);
-                lb_display_text_->setText(cur_py_text_);
-                //lb_display_text_->adjustSize();
-                showChinese(">>", getChineseListMap(cur_py_text_));
-            }
-            else {
-                InsertTextToCurFocusWt(" ");
-                clearBuffer();
-            }
+            recKeyClicked(" ");
         }
         else if(str=="Ls"||str=="Rs") { //大小写切换
             switchLetterStatus();
+            if( pKPY->isPinyinInput() ){
+                cur_py_text_ = "";
+                lb_display_text_->setText(cur_py_text_);
+                pKPY->py_resetToIdleState();
+            }
             if(mode_flag_map_[is_ch_mode]) {
                 clearBuffer();
             }
@@ -555,23 +571,36 @@ void XzSoftKeyboard::recKeyClicked(const QString &str)
             }
         }
         else if(str=="?123" || str=="ABC") {
-            recKeyClicked("ok");//除去拼音输入时遗留下来的拼音
+            recKeyClicked("cancel");//除去拼音输入时遗留下来的拼音
             if(str=="?123") {
                 return recKeyClicked("Ri"); //切换到下一页
             }
             else if(str=="ABC") {
                 mode_flag_map_[is_ch_mode] = !mode_flag_map_[is_ch_mode];
+                pKPY->py_resetToIdleState();
+                pKPY->set_to_pinyin( mode_flag_map_[is_ch_mode] );
+
                 return recKeyClicked("sw");
             }
         }
         else if(str == "ok") {
             if(!cur_py_text_.isEmpty()) {
                 InsertTextToCurFocusWt(cur_py_text_);
+                pKPY->py_resetToIdleState();
+                clearBuffer();
+            }
+        }
+        else if(str == "cancel") {
+            if(!cur_py_text_.isEmpty()) {
+                cur_py_text_ = "";
+                lb_display_text_->setText(cur_py_text_);
+                pKPY->py_resetToIdleState();
                 clearBuffer();
             }
         }
         else if(str == "hi") {
             this->hide();
+            pKPY->py_resetToIdleState();
         }
     }
 }
@@ -629,7 +658,6 @@ void XzSoftKeyboard::selectChinese()
 {
     const QPushButton* btn = (QPushButton*)sender();
     const QString &ch = btn->text();
-
 
     InsertTextToCurFocusWt(ch);
     clearBuffer();
@@ -890,7 +918,12 @@ void XzSoftKeyboard::hide()
     QWidget::hide();
 }
 
-
+void XzSoftKeyboard::s_pinyin_commit_text(const QString &_str)
+{
+    InsertTextToCurFocusWt(_str);
+    cur_py_text_ = QString("");
+    lb_display_text_->setText(cur_py_text_);
+}
 
 
 

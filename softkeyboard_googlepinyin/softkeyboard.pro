@@ -45,11 +45,17 @@ DEFINES += LIB_SOFTKEYBOARD
 #DEFINES += LIB_STATIC_SOFTKEYBOARD
 
 SOURCES += \
-    $$PWD/softkeyboard.cpp
+    $$PWD/softkeyboard.cpp \
+    $$PWD/CandidatesListWidget.cpp \
+    $$PWD/pinyindecoderservice.cpp \
+    keyboard_pinyin.cpp
 
 HEADERS += \
     $$PWD/softkeyboard.h \
-    softkeyboard_global.h
+    $$PWD/CandidatesListWidget.h \
+    $$PWD/pinyindecoderservice_p.h \
+    $$PWD/softkeyboard_global.h \
+    keyboard_pinyin.h
 
 FORMS += \
     $$PWD/softkeyboard.ui

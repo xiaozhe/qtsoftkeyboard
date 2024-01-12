@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QMap>
+#include <QPointer>
 
 #include "softkeyboard_global.h"
 
@@ -105,6 +106,11 @@ public slots:
 signals:
     void changedOutSideTextSignal(const QString &text, const QString &objName);//表示当前外部输入源文本已经被改变
     void setDefaultColorSignal();
+
+
+private slots:
+    void s_pinyin_commit_text(const QString& _str);
+
 };
 
 #endif // XzSoftKeyboard_H

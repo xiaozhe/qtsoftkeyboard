@@ -37,6 +37,8 @@
 #include <QLoggingCategory>
 #include <QDebug>
 
+#include "softkeyboard_global.h"
+
 //QT_BEGIN_NAMESPACE
 //namespace QtVirtualKeyboard {
 
@@ -79,26 +81,28 @@ bool PinyinDecoderService::init()
     if (initDone)
         return true;
 
-//    QString sysDict(qEnvironmentVariable("QT_VIRTUALKEYBOARD_PINYIN_DICTIONARY"));
-    QString sysDict(qgetenv("QT_VIRTUALKEYBOARD_PINYIN_DICTIONARY"));
-    if (!QFileInfo::exists(sysDict)) {
-        sysDict = QLatin1String(":/dict/dict_pinyin.dat");
-        if (!QFileInfo::exists(sysDict))
-            sysDict = QLibraryInfo::location(QLibraryInfo::DataPath) + QLatin1String("/qtvirtualkeyboard/pinyin/dict_pinyin.dat");
-    }
+    //    QString sysDict(qEnvironmentVariable("QT_VIRTUALKEYBOARD_PINYIN_DICTIONARY"));
+    //QString sysDict(qgetenv("QT_VIRTUALKEYBOARD_PINYIN_DICTIONARY"));
+    //if (!QFileInfo::exists(sysDict)) {
+    //    sysDict = QLatin1String(":/xzskb/data/dict.dat");
+    //    if (!QFileInfo::exists(sysDict))
+    //        sysDict = QLibraryInfo::location(QLibraryInfo::DataPath) + QLatin1String("/qtvirtualkeyboard/pinyin/dict_pinyin.dat");
+    //}
+    QString sysDict(":/xzskb/data/dict.dat");
 
-    QString usrDictPath = QStandardPaths::writableLocation(QStandardPaths::ConfigLocation);
-    QFileInfo usrDictInfo(usrDictPath + QLatin1String("/qtvirtualkeyboard/pinyin/usr_dict.dat"));
-    if (!usrDictInfo.exists()) {
-        qWarning() << "PinyinDecoderService::init(): creating directory for user dictionary" << usrDictInfo.absolutePath();
-        QDir().mkpath(usrDictInfo.absolutePath());
-    }
+    //QString usrDictPath = QStandardPaths::writableLocation(QStandardPaths::ConfigLocation);
+    //QFileInfo usrDictInfo(usrDictPath + QLatin1String(":/xzskb/data/user.data"));
+    QFileInfo usrDictInfo(QLatin1String(":/xzskb/data/user.data"));
+    //if (!usrDictInfo.exists()) {
+    //    qWarning() << "PinyinDecoderService::init(): creating directory for user dictionary" << usrDictInfo.absolutePath();
+    //    QDir().mkpath(usrDictInfo.absolutePath());
+    //}
 
     initDone = im_open_decoder(sysDict.toUtf8().constData(), usrDictInfo.absoluteFilePath().toUtf8().constData());
-    if (!initDone)
-    {
+    if (!initDone){
         qWarning() << "Could not initialize pinyin engine. sys_dict:" << sysDict << "usr_dict:" << usrDictInfo.absoluteFilePath();
     }
+    QDEBUGT << "im_open_decoder return: " << initDone;
 
     return initDone;
 }
@@ -108,10 +112,13 @@ void PinyinDecoderService::setUserDictionary(bool enabled)
     if (enabled == im_is_user_dictionary_enabled())
         return;
     if (enabled) {
-        QString usrDictPath = QStandardPaths::writableLocation(QStandardPaths::ConfigLocation);
-        QFileInfo usrDictInfo(usrDictPath + QLatin1String("/qtvirtualkeyboard/pinyin/usr_dict.dat"));
+        //QString usrDictPath = QStandardPaths::writableLocation(QStandardPaths::ConfigLocation);
+        //QFileInfo usrDictInfo(usrDictPath + QLatin1String("/qtvirtualkeyboard/pinyin/usr_dict.dat"));
+        //im_init_user_dictionary(usrDictInfo.absoluteFilePath().toUtf8().constData());
+        QFileInfo usrDictInfo(QLatin1String(":/xzskb/data/user.data"));
         im_init_user_dictionary(usrDictInfo.absoluteFilePath().toUtf8().constData());
-    } else {
+    }
+    else {
         im_init_user_dictionary(nullptr);
     }
 }

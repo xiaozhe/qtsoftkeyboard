@@ -5,16 +5,21 @@
 #include <QDebug>
 #include <QtWidgets>
 
+#include "softkeyboard_global.h"
+
 CandidatesListWidget::CandidatesListWidget(QWidget *parent) : QWidget(parent)
 {
+    setAttribute(Qt::WA_StyleSheet, true);
+    setAttribute(Qt::WA_StyledBackground, true);
+
     lastPage = new QPushButton(this);
     nextPage= new QPushButton(this);
 
     lastPage->setText("<");
     nextPage->setText(">");
 
-    lastPage->setMinimumSize(50,40);
-    nextPage->setMinimumSize(50,40);
+    //lastPage->setMinimumSize(50,40);
+    //nextPage->setMinimumSize(50,40);
 
     nextPage->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Fixed);
     lastPage->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Fixed);
@@ -25,18 +30,23 @@ CandidatesListWidget::CandidatesListWidget(QWidget *parent) : QWidget(parent)
     QHBoxLayout * layout = new QHBoxLayout;
     layout->addWidget(lastPage);
     layout->addWidget(nextPage);
-    layout->addItem(new QSpacerItem(80,40,QSizePolicy::Expanding,QSizePolicy::Minimum));
-    layout->setSpacing(5);
+    layout->addItem(new QSpacerItem(20,20,QSizePolicy::Expanding,QSizePolicy::Minimum));
+    layout->setSpacing( 5 );
+    layout->setMargin( 0 );
 
     setLayout(layout);
-    setFont(QFont("Arial",20));
+    //setFont(QFont("Arial",20));
 
     lastPage->setEnabled(false);
     nextPage->setEnabled(false);
+    lastPage->setVisible( false );
+    nextPage->setVisible( false );
 }
 
 void CandidatesListWidget::setCandidatesList(const QStringList &texts)
 {
+    QDEBUGT << texts;
+
     candidatesList = texts;
     pageIndex = 0;
     curIndex = 0;
@@ -45,6 +55,14 @@ void CandidatesListWidget::setCandidatesList(const QStringList &texts)
     textRects.clear();
     pageHeadIndex.clear();
     pageHeadIndex.append(0);
+    if( texts.count() > 0 ){
+        lastPage->setVisible( true );
+        nextPage->setVisible( true );
+    }
+    else{
+        lastPage->setVisible( false );
+        nextPage->setVisible( false );
+    }
     update();
 }
 
@@ -90,28 +108,27 @@ void CandidatesListWidget::paintEvent(QPaintEvent *event)
 
     QPainter painter(this);
 
-    QFont font("Microsoft YaHei",18);
-    painter.setFont(font);
+    //QFont font("Microsoft YaHei",18);
+    //painter.setFont(font);
 
     QRect rectText = nextPage->geometry();
+    QDEBUGT << "rectText" << rectText;
+
     rectText.setLeft(rectText.right() + 20);
     rectText.setRight(width());
 
     textRects.clear();
-    int i;
-    for(i = headTextIndex;i < candidatesList.size();++i)
-    {
-        if(i == headTextIndex)
+    int ifor0;
+    for(ifor0 = headTextIndex; ifor0 < candidatesList.size(); ++ifor0){
+        if(ifor0 == headTextIndex)
             painter.setPen(QColor(Qt::white));
         else
             painter.setPen(QColor(121,193,59));
 
-        QString strTextDraw = /*QString::number(i - headTextIndex + 1) + "." + */candidatesList[i];
-
+        QString strTextDraw = /*QString::number(i - headTextIndex + 1) + "." + */candidatesList[ifor0];
         QRect br = painter.boundingRect(rectText,Qt::AlignLeft | Qt::AlignVCenter,strTextDraw);
 
-        if(br.right() + 30 >= width())
-        {
+        if(br.right() + 10 >= width()){
             nextPage->setEnabled(true);
             break;
         }
@@ -119,19 +136,18 @@ void CandidatesListWidget::paintEvent(QPaintEvent *event)
             painter.drawText(rectText,Qt::AlignLeft | Qt::AlignVCenter,strTextDraw);
 
         textRects.append(br);
-        tailTextIndex = i;
+        tailTextIndex = ifor0;
 
-        rectText.translate(br.width() + 30,0);
+        rectText.translate(br.width() + 10,0);
     }
 
-    if(i >= candidatesList.size())
+    if(ifor0 >= candidatesList.size())
         nextPage->setEnabled(false);
 }
 
 void CandidatesListWidget::mousePressEvent(QMouseEvent *e)
 {
-    for(int i = 0;i < textRects.size();++i)
-    {
+    for(int i = 0;i < textRects.size();++i) {
         if(textRects[i].contains(e->pos()))
             chooseText(headTextIndex + i);
     }
