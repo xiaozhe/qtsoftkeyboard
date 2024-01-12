@@ -1,0 +1,21 @@
+<RCC>
+    <qresource prefix="/xzskb">
+        <file>data/dict.dat</file>
+        <file>data/pinyin_ex.ini</file>
+        <file>data/user.dat</file>
+    </qresource>
+    <qresource prefix="/xzskb">
+        <file>icon/back-RGB60.png</file>
+        <file>icon/Earth-RGB60.png</file>
+        <file>icon/keyboard-hide-RGB60.png</file>
+        <file>icon/left-RGB60.png</file>
+        <file>icon/right-RGB60.png</file>
+        <file>icon/shift-RGB60.png</file>
+        <file>icon/triangle-outline-RGB60.png</file>
+        <file>icon/return-RGB60.png</file>
+        <file>icon/backspace-RGB60.png</file>
+    </qresource>
+    <qresource prefix="/xzskb">
+        <file>qss/keyboard.qss</file>
+    </qresource>
+</RCC>
