@@ -16,8 +16,13 @@ public:
     static xzKeyboardPinyin *g(QObject *parent = nullptr);
 
 public:
-    enum Py_State
-    {
+    enum Action_Type{
+        Input_Char,       //输入一个字符
+        Remove_Char,      //删除一个字符
+        Choose_Candidate, //选择一个候选
+        Unkonow
+    };
+    enum Py_State{
         Idle,   //
         Input,  //
         Predict //联想状态
@@ -56,12 +61,16 @@ private:
     bool m_py_finish_selection;
     int m_py_active_cmps_len;
     InputMode m_py_input_mode;
+    Action_Type m_action_type;
 
 public:
     QString surface() { return m_py_surface;}
     int total_num() { return m_py_total_num; }
     bool isPinyinInput() { return m_py_input_mode == InputMode::Pinyin; }
     void set_to_pinyin(bool _py);
+
+public slots:
+    void s_chooseCandidate(int _id);
 
 public:
     bool py_key_event(Qt::Key key, const QString &text, Qt::KeyboardModifiers modifiers);
@@ -84,6 +93,7 @@ public:
 signals:
     void si_show_list(const QStringList & _strings);
     void si_commit_text(const QString& _str);
+    void si_update_input(const QString& _str);
 
 signals:
 

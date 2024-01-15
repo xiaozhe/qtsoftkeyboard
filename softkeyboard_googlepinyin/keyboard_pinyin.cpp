@@ -1,6 +1,9 @@
 #include "keyboard_pinyin.h"
 
 #include "softkeyboard_global.h"
+#include "define_debug_output.h"
+
+#include <QTimer>
 
 xzKeyboardPinyin* xzKeyboardPinyin::m_client = nullptr;
 
@@ -21,6 +24,16 @@ void xzKeyboardPinyin::set_to_pinyin(bool _py)
     else{
         m_py_input_mode = InputMode::Latin;
     }
+    m_action_type = Action_Type::Unkonow;
+}
+
+void xzKeyboardPinyin::s_chooseCandidate(int _id)
+{
+    m_action_type = Action_Type::Choose_Candidate;
+    chooseAndUpdate(_id);
+    updateCandidateList();
+
+    emit si_update_input( m_py_composing_str );
 }
 
 xzKeyboardPinyin::xzKeyboardPinyin(QObject *parent)
@@ -39,6 +52,7 @@ xzKeyboardPinyin::xzKeyboardPinyin(QObject *parent)
     m_candidates_list.clear();
     m_pinyin_service      = PinyinDecoderService::getInstance();
     m_pinyin_service->setUserDictionary( true );
+    m_action_type = Action_Type::Unkonow;
 }
 
 
@@ -60,6 +74,7 @@ bool xzKeyboardPinyin::py_key_event(Qt::Key key, const QString &text, Qt::Keyboa
                 py_resetToIdleState();
             }
             if (addSpellingChar(text.at(0), m_py_state == Py_State::Idle)){
+                m_action_type = Action_Type::Input_Char;
                 chooseAndUpdate(-1);
                 bReturn = true;
                 break;
@@ -83,6 +98,7 @@ bool xzKeyboardPinyin::py_key_event(Qt::Key key, const QString &text, Qt::Keyboa
             }
         }
         else if (key == Qt::Key_Backspace){
+            m_action_type = Action_Type::Remove_Char;
             if(m_py_state == Py_State::Idle){
                 //inputContext()->sendKeyClick(key,text,modifiers);
             }
@@ -117,7 +133,7 @@ bool xzKeyboardPinyin::py_key_event(Qt::Key key, const QString &text, Qt::Keyboa
         for(int ifor0 = 0; ifor0 < m_py_total_num; ++ ifor0 ){
             sList += candidateAt(ifor0) + ",";
         }
-        QDEBUGT << m_py_surface << m_py_composing_str << sList;
+        //QDEBUGT << m_py_surface << m_py_composing_str << sList;
     }while(false);
     return bReturn;
 }
@@ -134,7 +150,9 @@ bool xzKeyboardPinyin::addSpellingChar(QChar _ch, bool _reset)
         if (m_py_surface.endsWith(_ch))
             return true;
     }
+    QDEBUGT << "m_py_surface  >>>> " << m_py_surface;
     m_py_surface.append(_ch);
+    QDEBUGT << "m_py_surface  >>>> " << m_py_surface;
     return true;
 }
 
@@ -150,17 +168,22 @@ bool xzKeyboardPinyin::removeSpellingChar()
 
 void xzKeyboardPinyin::chooseAndUpdate(int _candId)
 {
+    QDEBUGT << " m_py_state " << m_py_state << " id " << _candId;
     //联想状态选择联想词
-    if (m_py_state == Predict)
+    if (m_py_state == Predict){
         choosePredictChoice(_candId);
-    else//对输入按键解码
+    }
+    else{//对输入按键解码
         chooseDecodingCandidate(_candId);
+    }
 
     if (m_py_composing_str.length() > 0){
+        QDEBUGT << "id " << _candId << " finish " << m_py_finish_selection
+                << " m_py_composing_str " << m_py_composing_str << " len: " << m_py_composing_str.length() << " " << m_py_fixed_len;
         if ((_candId >= 0 || m_py_finish_selection) && m_py_composing_str.length() == m_py_fixed_len){
             QString resultStr = getComposingStrActivePart();
             tryPredict();
-            emit si_commit_text(resultStr);
+            emit si_commit_text( resultStr );
             //InsertTextToCurFocusWt(resultStr);
             //q->inputContext()->commit(resultStr);
         }
@@ -206,16 +229,31 @@ void xzKeyboardPinyin::chooseDecodingCandidate(int candId)
     //Q_ASSERT(m_py_state != Predict);
 
     int result = 0;
-    if (candId < 0) {
+    if (candId == -2 ) {
         if (m_py_surface.length() > 0) {
+            result = m_pinyin_service->deleteSearch(m_py_pos_del_spl, m_py_is_pos_in_spl, false);
+            QDEBUGT << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>> " << result << m_py_pos_del_spl << m_py_is_pos_in_spl;
+            m_py_pos_del_spl = -1;
+            m_pinyin_service->resetSearch();
+
+            result = m_pinyin_service->search(m_py_surface);
+            QDEBUGT << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>> " << result;
+        }
+    }
+    else if (candId < 0) {
+        if (m_py_surface.length() > 0) {
+            QDEBUGT << "m_py_surface" << m_py_surface << m_py_pos_del_spl;
             if (m_py_pos_del_spl < 0) {
                 result = m_pinyin_service->search(m_py_surface);
-            } else {
+            }
+            else {
                 result = m_pinyin_service->deleteSearch(m_py_pos_del_spl, m_py_is_pos_in_spl, false);
                 m_py_pos_del_spl = -1;
             }
+            QDEBUGT << "m_py_surface" << m_py_surface << m_py_pos_del_spl;
         }
-    } else {
+    }
+    else {
         if (m_py_total_num > 1) {
             result = m_pinyin_service->chooceCandidate(candId);
         }
@@ -244,6 +282,9 @@ void xzKeyboardPinyin::chooseDecodingCandidate(int candId)
     m_py_composing_str = fullSent.mid(0, m_py_fixed_len) + m_py_surface.mid(splStart[m_py_fixed_len + 1]);
     m_py_active_cmps_len = m_py_composing_str.length();
 
+    QDEBUGT << "m_py_surface " << m_py_surface << " len:: " << m_py_surface.length()
+            << " fixed_len " << m_py_fixed_len;
+
     // Prepare the display string.
     QString composingStrDisplay;
     int surfaceDecodedLen = m_pinyin_service->pinyinStringLength(true);
@@ -263,9 +304,31 @@ void xzKeyboardPinyin::chooseDecodingCandidate(int candId)
         if (surfaceDecodedLen < m_py_surface.length())
             composingStrDisplay += m_py_surface.mid(surfaceDecodedLen).toLower();
     }
+    QDEBUGT << " m_py_composing_str " << m_py_composing_str << " composingStrDisplay " << composingStrDisplay << " decode len:" << surfaceDecodedLen
+            << "splstrt" << splStart << " " << m_py_surface << m_candidates_list;
 
     //q->inputContext()->setPreeditText(composingStrDisplay);
     m_py_finish_selection = splStart.size() == (m_py_fixed_len + 2);
+    if( surfaceDecodedLen <= 0 ) m_py_finish_selection = false;
+    if( m_py_fixed_len <= 0    ) m_py_finish_selection = false;
+
+    if( m_py_finish_selection ){
+        if( m_action_type == Action_Type::Remove_Char ){
+            QDEBUGT << splStart << " " << m_py_surface << m_candidates_list;
+            if( m_py_surface.length() > 0 && m_candidates_list.size() <= 0 ){
+                chooseDecodingCandidate( -2 );
+            }
+        }
+    }
+    else{
+        if( m_action_type == Action_Type::Remove_Char ){
+            if( m_py_composing_str != m_py_surface ){
+                emit si_update_input( m_py_composing_str );
+                QDEBUGT << " si_update_input( m_py_composing_str ); " << m_py_composing_str;
+            }
+        }
+    }
+    //m_py_finish_selection = false;
     if (!m_py_finish_selection)
         candidateAt(0);
 }
@@ -304,6 +367,7 @@ void xzKeyboardPinyin::resetCandidates()
     //if (m_py_total_num) {
     //    m_py_total_num = 0;
     //}
+    updateCandidateList();
 }
 
 void xzKeyboardPinyin::updateCandidateList()
@@ -365,6 +429,7 @@ void xzKeyboardPinyin::py_resetToIdleState()
     m_py_pos_del_spl = -1;
     m_py_is_pos_in_spl = false;
     m_py_total_num = 0;
+    m_action_type = Action_Type::Unkonow;
 
     resetCandidates();
 }

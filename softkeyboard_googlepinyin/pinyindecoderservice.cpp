@@ -38,6 +38,7 @@
 #include <QDebug>
 
 #include "softkeyboard_global.h"
+#include "define_debug_output.h"
 
 //QT_BEGIN_NAMESPACE
 //namespace QtVirtualKeyboard {

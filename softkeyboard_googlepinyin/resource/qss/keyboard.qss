@@ -85,10 +85,12 @@ XzSoftKeyboard QLineEdit#lb_display_text[text=""]
 /* 专用来显示待选中文 */
 XzSoftKeyboard QWidget#widget_showChinese
 {
-    border:0px;
+    /* border:0px; */
     /* background:rgba(222,222,222,255);*/
     /* qproperty-minimumSize: 9999px 50px; */
-    qproperty-maximumSize: 9999px 50px;
+    /* qproperty-maximumSize: 9999px 50px; */
+    /* qproperty-minimumHeight: 32px; */
+    height:32px;
 }
 
 
@@ -209,18 +211,25 @@ XzSoftKeyboard QPushButton#btn4_hide
     image: url(:/xzskb/icon/triangle-outline-RGB60.png);
 }
 
-
 XzSoftKeyboard CandidatesListWidget
 {
-    border:1px solid rgba(255,0,0, 255);
-    padding:0px;
-    margin:0px;
+    border:0px solid rgba(255,0,0, 255);
+    height:32px;
+    qproperty-spacerItemHeight: 32;
+    /* qproperty-minimumHeight: 32px; */
+    padding: 0px;
+    margin-top:2px;
+    margin-bottom:2px;
+    margin-right:0px;
+    margin-left:0px;
 }
 
 XzSoftKeyboard CandidatesListWidget QSpacerItem
 {
-    border:1px solid rgba(255,255,0, 255);
-    background-color:rgba(0,140,140,255);
+    border:1px solid rgba(255,0,0, 255);
+    height:34px;
+    width:2px;
+    background-color:rgba(0,0,0,0%);
 }
 
 XzSoftKeyboard CandidatesListWidget QPushButton

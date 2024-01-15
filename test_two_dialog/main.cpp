@@ -38,7 +38,8 @@ int main(int argc, char *argv[])
     auto keyboard = XzSoftKeyboard::getKeyboard();
     keyboard->setGeometry(300, 200, 432, 185);
     //keyboard->init("virtualkeyboard_hasQSQLITE/Resource/ChinesePY.db");
-    keyboard->init("/db/pinyin.db");
+    //keyboard->init("/db/pinyin.db");
+    keyboard->init();
 
 //    InputContext* input = new InputContext();
 //    a.connect(qApp, SIGNAL(focusChanged(QWidget *, QWidget *)), input, SLOT(focusChangedSlot(QWidget *, QWidget *)));

@@ -55,6 +55,7 @@ HEADERS += \
     $$PWD/CandidatesListWidget.h \
     $$PWD/pinyindecoderservice_p.h \
     $$PWD/softkeyboard_global.h \
+    define_debug_output.h \
     keyboard_pinyin.h
 
 FORMS += \

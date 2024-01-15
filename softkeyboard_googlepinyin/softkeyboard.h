@@ -24,7 +24,7 @@ private:
 
 public:
     static XzSoftKeyboard *getKeyboard();
-    void init(const QString& db_path); //"" 表示不使用 汉字词组
+    void init(); //"" 表示不使用 汉字词组
     ~XzSoftKeyboard()override;
 
     void setParentWdg(QWidget * _pw);
@@ -49,12 +49,11 @@ private:
 
 private:
     QWidget* cur_focus_wt_ = nullptr; //记录当前焦点控件
+    Qt::WindowFlags m_set_win_flags;
 
+    void init1();  //添加UI中的变量及信号与槽
+    void init2();  //布局、数据、等只需要初始化一次的
 
-    void init1();//添加UI中的变量及信号与槽
-    void init2(const QString& db_path);//布局、数据、等只需要初始化一次的
-
-    QMap<int, QStringList> getChineseListMap(const QString &cur_text);//获取汉字列表，重要-----------------------------------------
     void clearBuffer();//清除拼音、等缓存
     void switchLetterStatus();//切换大小写
     QSqlDatabase* db_=nullptr;
@@ -77,19 +76,15 @@ private:
     enum{is_ch_mode,is_capital_mode};
     QMap<int, bool>mode_flag_map_{};
 
-
     //    typedef  void (*setText_fp) (const QString&);
     QString objName_="";
     //    QMap<QString, setText_fp>objName_fp_map_;
 
-    void ShowPinYinTip();//显示当前输入的拼音
     void InsertTextToCurFocusWt(const QString& str);
     void DeleteTextFromCurFocusWt();
     void recKeyClicked(const QString& str);//处理所有虚拟键盘的按钮  -------------------------------------------------
 private slots:
-    void showChinese(const QString &key, const QMap<int, QStringList> &chinese_list_map);
     void recKeyClickedSlot();//处理所有虚拟键盘的按钮  -------------------------------------------------
-    void selectChinese();
     void focusChangedSlot(QWidget *old, QWidget *now);//处理 qApp 过来的内容
 protected:
     QWidget * m_top_wdg = nullptr;
@@ -110,6 +105,7 @@ signals:
 
 private slots:
     void s_pinyin_commit_text(const QString& _str);
+    void s_show_choose_candidate(const QString& _str);
 
 };
 

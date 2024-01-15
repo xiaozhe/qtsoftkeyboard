@@ -6,6 +6,7 @@
 #include <QtWidgets>
 
 #include "softkeyboard_global.h"
+#include "define_debug_output.h"
 
 CandidatesListWidget::CandidatesListWidget(QWidget *parent) : QWidget(parent)
 {
@@ -21,8 +22,8 @@ CandidatesListWidget::CandidatesListWidget(QWidget *parent) : QWidget(parent)
     //lastPage->setMinimumSize(50,40);
     //nextPage->setMinimumSize(50,40);
 
-    nextPage->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Fixed);
-    lastPage->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Fixed);
+    //nextPage->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Fixed);
+    //lastPage->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Fixed);
 
     connect(lastPage,&QPushButton::clicked,this,&CandidatesListWidget::onLastPage);
     connect(nextPage,&QPushButton::clicked,this,&CandidatesListWidget::onNextPage);
@@ -30,7 +31,9 @@ CandidatesListWidget::CandidatesListWidget(QWidget *parent) : QWidget(parent)
     QHBoxLayout * layout = new QHBoxLayout;
     layout->addWidget(lastPage);
     layout->addWidget(nextPage);
-    layout->addItem(new QSpacerItem(20,20,QSizePolicy::Expanding,QSizePolicy::Minimum));
+    QDEBUGT << "m_spacer_height" << m_spacer_height;
+    m_spacer_item = new QSpacerItem(2,m_spacer_height,QSizePolicy::Expanding,QSizePolicy::Minimum);
+    layout->addItem(m_spacer_item);
     layout->setSpacing( 5 );
     layout->setMargin( 0 );
 
@@ -86,6 +89,19 @@ void CandidatesListWidget::clear()
 
 }
 
+void CandidatesListWidget::setSpacerItemH(int _value)
+{
+    QDEBUGT << "m_spacer_height" << m_spacer_height;
+    m_spacer_height = _value;
+    QDEBUGT << "m_spacer_height" << m_spacer_height;
+    m_spacer_item->changeSize(2,m_spacer_height,QSizePolicy::Expanding,QSizePolicy::Minimum);
+}
+
+void CandidatesListWidget::showEvent(QShowEvent *event)
+{
+    Q_UNUSED(event);
+}
+
 void CandidatesListWidget::onNextPage()
 {
     if(tailTextIndex >= candidatesList.size() - 1)
@@ -105,6 +121,7 @@ void CandidatesListWidget::onNextPage()
 void CandidatesListWidget::paintEvent(QPaintEvent *event)
 {
     Q_UNUSED(event)
+
 
     QPainter painter(this);
 
