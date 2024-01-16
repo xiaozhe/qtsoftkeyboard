@@ -90,6 +90,7 @@ bool PinyinDecoderService::init()
     //        sysDict = QLibraryInfo::location(QLibraryInfo::DataPath) + QLatin1String("/qtvirtualkeyboard/pinyin/dict_pinyin.dat");
     //}
     QString sysDict(":/xzskb/data/dict.dat");
+    //QString sysDict(":/xzskb/data/pinyin_ex.ini");
 
     //QString usrDictPath = QStandardPaths::writableLocation(QStandardPaths::ConfigLocation);
     //QFileInfo usrDictInfo(usrDictPath + QLatin1String(":/xzskb/data/user.data"));

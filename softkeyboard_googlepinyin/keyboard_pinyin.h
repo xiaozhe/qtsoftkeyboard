@@ -65,6 +65,7 @@ private:
 
 public:
     QString surface() { return m_py_surface;}
+    QString composing_str() { return m_py_composing_str;}
     int total_num() { return m_py_total_num; }
     bool isPinyinInput() { return m_py_input_mode == InputMode::Pinyin; }
     void set_to_pinyin(bool _py);

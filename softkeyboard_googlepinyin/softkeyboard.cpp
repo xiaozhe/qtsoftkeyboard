@@ -387,6 +387,11 @@ void XzSoftKeyboard::recKeyClicked(const QString &str)
                 }
                 pKPY->py_resetToIdleState();
             }
+            else{
+                if( cur_py_text_ != pKPY->composing_str() ){
+                    lb_display_text_->setText( pKPY->composing_str() );
+                }
+            }
             bInPinyin = true;
             break;
         }while(false);
