@@ -65,8 +65,16 @@ FORMS += \
 RESOURCES += \
     $$PWD/resource/softkeyboard_res.qrc
 
+DISTFILES += \
+    copy_publish_files.sh
 
 
 
+
+
+publish_include = $$PWD/../_publish/$$KIT_NAME/softkeyboard/include
+publish_lib = $$PWD/../_publish/$$KIT_NAME/softkeyboard/lib
+
+QMAKE_POST_LINK += $$PWD/copy_publish_files.sh $$PWD $$publish_include $$DESTDIR $$publish_lib $$VERSION_APP_LIB $$TARGET
 
 

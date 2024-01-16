@@ -682,9 +682,7 @@ bool XzSoftKeyboard::eventFilter(QObject *_obj, QEvent *_event)
         //if( _event->type() != QEvent::FocusOut ) bDealFocusInOut = true;
         if( ! bDealFocusInOut ) break;
 
-        QFocusEvent * _evFocus = reinterpret_cast<QFocusEvent *>(_event);
-
-
+        //QFocusEvent * _evFocus = reinterpret_cast<QFocusEvent *>(_event);
         if( _obj == nullptr ) break;
         if( ! _obj->inherits("QWidget") ) break;
 
