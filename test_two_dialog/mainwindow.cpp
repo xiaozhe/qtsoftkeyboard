@@ -8,6 +8,8 @@
 
 #include <QGuiApplication>
 #include <QMutex>
+#include <QMouseEvent>
+#include <QDebug>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -39,6 +41,11 @@ MainWindow *MainWindow::g(QWidget *_parent)
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+void MainWindow::mousePressEvent(QMouseEvent *event)
+{
+    qDebug() << event->pos() << event->globalPos();
 }
 
 
