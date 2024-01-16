@@ -129,10 +129,10 @@ bool xzKeyboardPinyin::py_key_event(Qt::Key key, const QString &text, Qt::Keyboa
         if( !bRefresh ) break;
 
         updateCandidateList();
-        QString sList = QString("");
-        for(int ifor0 = 0; ifor0 < m_py_total_num; ++ ifor0 ){
-            sList += candidateAt(ifor0) + ",";
-        }
+        //QString sList = QString("");
+        //for(int ifor0 = 0; ifor0 < m_py_total_num; ++ ifor0 ){
+        //    sList += candidateAt(ifor0) + ",";
+        //}
         //QDEBUGT << m_py_surface << m_py_composing_str << sList;
     }while(false);
     return bReturn;
@@ -231,6 +231,8 @@ void xzKeyboardPinyin::chooseDecodingCandidate(int candId)
     int result = 0;
     if (candId == -2 ) {
         if (m_py_surface.length() > 0) {
+            result = m_pinyin_service->cancelLastChoice();
+            /*
             result = m_pinyin_service->deleteSearch(m_py_pos_del_spl, m_py_is_pos_in_spl, false);
             QDEBUGT << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>> " << result << m_py_pos_del_spl << m_py_is_pos_in_spl;
             m_py_pos_del_spl = -1;
@@ -238,6 +240,10 @@ void xzKeyboardPinyin::chooseDecodingCandidate(int candId)
 
             result = m_pinyin_service->search(m_py_surface);
             QDEBUGT << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>> " << result;
+            */
+        }
+        else{
+            m_pinyin_service->resetSearch();
         }
     }
     else if (candId < 0) {

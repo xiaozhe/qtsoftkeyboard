@@ -643,7 +643,8 @@ void XzSoftKeyboard::focusChangedSlot(QWidget *old, QWidget *now)
             iYTar -= geometry().height();
             iYTar -= rNowGeo.height();
         }
-        QPoint posTar = topWdg->mapToGlobal(QPoint(iXTar, iYTar));
+        //QPoint posTar = topWdg->mapToGlobal(QPoint(iXTar, iYTar));
+        QPoint posTar = QPoint(iXTar, iYTar);
         QDEBUGT << iXTar << iYTar << parentWidget() << parent() << topWdg;
         bShow = true;
         this->show();
