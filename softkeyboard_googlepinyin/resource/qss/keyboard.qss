@@ -214,6 +214,7 @@ XzSoftKeyboard QPushButton#btn4_hide
 XzSoftKeyboard CandidatesListWidget
 {
     border:0px solid rgba(255,0,0, 255);
+    background:rgba(221,225,228,255);
     height:32px;
     qproperty-spacerItemHeight: 32;
     /* qproperty-minimumHeight: 32px; */
