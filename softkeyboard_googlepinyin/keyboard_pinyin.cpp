@@ -4,6 +4,7 @@
 #include "define_debug_output.h"
 
 #include <QTimer>
+#include <QSettings>
 
 xzKeyboardPinyin* xzKeyboardPinyin::m_client = nullptr;
 
@@ -13,6 +14,12 @@ xzKeyboardPinyin *xzKeyboardPinyin::g(QObject *parent)
         m_client = new xzKeyboardPinyin(parent);
     }
     return m_client;
+}
+
+xzKeyboardPinyin::~xzKeyboardPinyin()
+{
+    m_EN_out_list.clear();
+    m_EN_list.clear();
 }
 
 void xzKeyboardPinyin::set_to_pinyin(bool _py)
@@ -53,6 +60,15 @@ xzKeyboardPinyin::xzKeyboardPinyin(QObject *parent)
     m_pinyin_service      = PinyinDecoderService::getInstance();
     m_pinyin_service->setUserDictionary( true );
     m_action_type = Action_Type::Unkonow;
+
+    QSettings setter(":/xzskb/data/pinyin_ex.ini", QSettings::IniFormat);
+
+    m_EN_list.clear();
+    m_EN_list = setter.value("pyEn", m_EN_list).toStringList();
+    if (m_EN_list.size() <= 1){
+        qWarning() << "Can't load pinyin_en!";
+        //return;
+    }
 }
 
 
@@ -120,6 +136,8 @@ bool xzKeyboardPinyin::py_key_event(Qt::Key key, const QString &text, Qt::Keyboa
         }
     }while(false);
 
+    //just test::::
+    //BinarySearchEN(m_py_surface);
     do{
         bool bRefresh = false;
         if( iTotalNum != m_py_total_num) bRefresh = true;
@@ -438,6 +456,45 @@ void xzKeyboardPinyin::py_resetToIdleState()
     m_action_type = Action_Type::Unkonow;
 
     resetCandidates();
+}
+
+void xzKeyboardPinyin::BinarySearchEN(const QString &_str)
+{
+    if(_str.length() <= 0) return;
+    if(m_EN_list.length() <= 1) return;
+    int min = 0;
+    int max = m_EN_list.size();
+    int idx = max / 2;
+
+    m_EN_out_list.clear();
+    while (true){
+        if (m_EN_list[idx].startsWith(_str, Qt::CaseInsensitive))
+            break;
+        if (max == min + 1 || max <= min || max == idx + 1 || max == idx || min == idx + 1 || min == idx )
+            break;
+        if (m_EN_list[idx].toLower() > _str)
+            max = idx;
+        else
+            min = idx;
+        idx = (max + min) / 2;
+    }
+    do{
+        if (--idx < 0)
+            break;
+    }while(m_EN_list[idx].startsWith(_str, Qt::CaseInsensitive));
+
+    ++idx;
+    int cnt = 0;
+    while(++cnt < 50){
+        if (idx >= m_EN_list.size())
+            break;
+        if (m_EN_list[idx].startsWith(_str, Qt::CaseInsensitive))
+            m_EN_out_list.append(m_EN_list[idx]);
+        else
+            break;
+        idx++;
+    }
+    QDEBUGT << m_EN_out_list;
 }
 
 

@@ -14,6 +14,7 @@ private:
     static xzKeyboardPinyin * m_client;
 public:
     static xzKeyboardPinyin *g(QObject *parent = nullptr);
+    ~xzKeyboardPinyin();
 
 public:
     enum Action_Type{
@@ -97,6 +98,12 @@ signals:
     void si_update_input(const QString& _str);
 
 signals:
+
+private:
+    QStringList m_EN_list;
+    QStringList m_EN_out_list;
+private:
+    void BinarySearchEN(const QString &_str);
 
 };
 
