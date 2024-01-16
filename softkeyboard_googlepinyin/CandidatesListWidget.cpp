@@ -16,6 +16,10 @@ CandidatesListWidget::CandidatesListWidget(QWidget *parent) : QWidget(parent)
     lastPage = new QPushButton(this);
     nextPage= new QPushButton(this);
 
+    lastPage->setFocusPolicy( Qt::FocusPolicy::NoFocus );
+    nextPage->setFocusPolicy( Qt::FocusPolicy::NoFocus );
+    this->setFocusPolicy( Qt::FocusPolicy::NoFocus );
+
     lastPage->setText("<");
     nextPage->setText(">");
 
