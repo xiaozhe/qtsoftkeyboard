@@ -1,3 +1,5 @@
 _build/
 *.pro.user
 *.swp
+_publish/B5152/*
+

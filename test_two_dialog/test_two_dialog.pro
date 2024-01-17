@@ -65,12 +65,22 @@ HEADERS += \
 
 
 
-_TAR_PATH = $$PWD/../_build/$$KIT_NAME/bin
-#编译完成后
-QMAKE_POST_LINK += cp $${PWD}/run_test.sh  $${_TAR_PATH}/run_test.sh;
-
-_RUN_FILE=$${_TAR_PATH}/run_test.sh
-QMAKE_POST_LINK += chmod +x $$_RUN_FILE;
 
 DISTFILES += \
+    debug_run_test.sh \
     run_test.sh
+
+
+#编译完成后
+_TAR_PATH = $$PWD/../_build/$$KIT_NAME/bin
+CONFIG(debug, debug|release){
+    QMAKE_POST_LINK += cp $${PWD}/debug_run_test.sh  $${_TAR_PATH}/debug_run_test.sh;
+    _RUN_FILE=$${_TAR_PATH}/debug_run_test.sh
+    QMAKE_POST_LINK += chmod +x $$_RUN_FILE;
+}
+else{
+    QMAKE_POST_LINK += cp $${PWD}/run_test.sh  $${_TAR_PATH}/run_test.sh;
+    _RUN_FILE=$${_TAR_PATH}/run_test.sh
+    QMAKE_POST_LINK += chmod +x $$_RUN_FILE;
+}
+

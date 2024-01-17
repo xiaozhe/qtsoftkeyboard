@@ -32,6 +32,8 @@ DESTDIR  = $$PWD/../_build/$$KIT_NAME/lib
 CONFIG(debug, debug|release){
     TARGET = $$join(TARGET,,,d)
     LIBS += -L$$PWD/../_build/$$KIT_NAME/lib -lqtpinyind
+
+    DEFINES += XZSOFTKEYBOARD_DEBUG=1
 }
 else{
     LIBS += -L$$PWD/../_build/$$KIT_NAME/lib -lqtpinyin
@@ -39,9 +41,6 @@ else{
 
 INCLUDEPATH += $$PWD/../pinyin/include
 
-CONFIG(debug, debug|release){
-    DEFINES += XZSOFTKEYBOARD_DEBUG=1
-}
 DEFINES += LIB_SOFTKEYBOARD
 #DEFINES += LIB_STATIC_SOFTKEYBOARD
 
@@ -70,11 +69,13 @@ DISTFILES += \
 
 
 
+CONFIG(release, debug|release){
+    publish_include = $$PWD/../_publish/$$KIT_NAME/softkeyboard/include
+    publish_lib = $$PWD/../_publish/$$KIT_NAME/softkeyboard/lib
+
+    QMAKE_POST_LINK += $$PWD/copy_publish_files.sh $$PWD $$publish_include $$DESTDIR $$publish_lib $$VERSION_APP_LIB $$TARGET
+}
 
 
-publish_include = $$PWD/../_publish/$$KIT_NAME/softkeyboard/include
-publish_lib = $$PWD/../_publish/$$KIT_NAME/softkeyboard/lib
-
-QMAKE_POST_LINK += $$PWD/copy_publish_files.sh $$PWD $$publish_include $$DESTDIR $$publish_lib $$VERSION_APP_LIB $$TARGET
 
 
