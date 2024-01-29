@@ -20,12 +20,16 @@
 (d)->setWindowFlags((d)->windowFlags()|Qt::FramelessWindowHint);\
 (d)->setAttribute(Qt::WA_TranslucentBackground, true)
 
+#include "app_event_filter.h"
+
 int main(int argc, char *argv[])
 {
     //qputenv("QT_IM_MODULE",QByteArray("Qt5Input"));
     QApplication a(argc, argv);
     //MainWindow w;
     //w.show();
+
+    app_event_filter * aef = new app_event_filter(&a);
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
     QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));

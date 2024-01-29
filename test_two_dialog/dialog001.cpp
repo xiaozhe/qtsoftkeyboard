@@ -6,6 +6,15 @@
 
 #include <QDebug>
 
+#include <QDateTime>
+#include <QStringList>
+#include <QDebug>
+
+    #define A_FILE      QString(__FILE__).split('/').last()
+    #define A_TIME      QDateTime::currentDateTime().toString ("hh:mm:ss")
+    #define QDEBUGT     qDebug() << QString("#SKB %1 %2 %3:%4 ").arg(A_TIME).arg(A_FILE).arg(__FUNCTION__).arg(__LINE__)
+    #define QDEBUG      qDebug() << QString("#SKB %1:%2 ").arg(A_FILE).arg(__LINE__)
+
 Dialog001::Dialog001(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::Dialog001)
@@ -30,9 +39,9 @@ void Dialog001::showEvent(QShowEvent *_ev)
 
     QInputMethod * pInput = QApplication::inputMethod();
     if( pInput ){
-        qDebug() << "VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV";
-        qDebug() << "VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV";
-        qDebug() << pInput->parent();
+        QDEBUGT << "VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV";
+        QDEBUGT << "VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV";
+        QDEBUGT << pInput->parent();
         //pInput->setParent( this );
         //this->setInputMethodHints()
     }
