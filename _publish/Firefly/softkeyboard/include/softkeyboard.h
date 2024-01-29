@@ -88,13 +88,15 @@ private slots:
     void focusChangedSlot(QWidget *old, QWidget *now);//处理 qApp 过来的内容
 protected:
     QWidget * m_top_wdg = nullptr;
+private:
+    //QPoint m_point_tar_zero;
+    //QPoint m_point_tar_parent;
 protected:
     bool eventFilter(QObject *_obj, QEvent *_event) override;
 
     //    void show(const QString &curText, const QString &recObjName);
     //    void show(const QString &curText, const QString &recObjName, setText_fp);
 
-    void show(int _x, int _y, QObject * _parent);
 public slots:
     void show();
     void hide();

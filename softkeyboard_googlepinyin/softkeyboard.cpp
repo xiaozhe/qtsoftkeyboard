@@ -43,7 +43,6 @@
 XzSoftKeyboard* XzSoftKeyboard::g_keyboard = nullptr;
 XzSoftKeyboard* XzSoftKeyboard::getKeyboard()
 {
-    QDEBUGT;
     if (g_keyboard==nullptr) {
         g_keyboard = new XzSoftKeyboard;
     }
@@ -147,7 +146,6 @@ void XzSoftKeyboard::init()
 
 void XzSoftKeyboard::init1()
 {
-    QDEBUGT;
     lb_display_text_ = new QLineEdit(this);
     lb_display_text_->setWindowFlags( Qt::WindowDoesNotAcceptFocus | Qt::FramelessWindowHint);
     lb_display_text_->setObjectName("lb_display_text");
@@ -223,7 +221,6 @@ void XzSoftKeyboard::init1()
 
 void XzSoftKeyboard::init2()
 {
-    QDEBUGT;
     ////设置汉字显示个数
     //QList<QPushButton*>btn_ch_list = btn_list_map_[row_1];
     //for(int i(MAX_VISIBLE+1); i<btn_ch_list.size()-1; i++) { //"<<" ">>"两个按钮
@@ -350,7 +347,7 @@ void XzSoftKeyboard::DeleteTextFromCurFocusWt()
 
 void XzSoftKeyboard::recKeyClicked(const QString &str)
 {
-    QDEBUGT << str << str.contains(QRegExp("[a-z]")) << "is ch:" << mode_flag_map_[is_ch_mode] << cur_py_text_.isEmpty();
+    // QDEBUGT << str << str.contains(QRegExp("[a-z]")) << "is ch:" << mode_flag_map_[is_ch_mode] << cur_py_text_.isEmpty();
     xzKeyboardPinyin * pKPY = xzKeyboardPinyin::g(this);
     if(str.size()==1) {
         bool bInPinyin = false;
@@ -364,11 +361,11 @@ void XzSoftKeyboard::recKeyClicked(const QString &str)
                 cur_py_text_ = "";
                 lb_display_text_->setText(cur_py_text_);
                 if( pKPY->total_num() > 0 ){
-                    QDEBUGT << "pinyin out zero :: " << pKPY->surface() << pKPY->candidateAt( 0 );
+                    // QDEBUGT << "pinyin out zero :: " << pKPY->surface() << pKPY->candidateAt( 0 );
                     InsertTextToCurFocusWt( pKPY->candidateAt( 0 ) );
                 }
                 else{
-                    QDEBUGT << "pinyin out surf:: " << pKPY->surface();
+                    // QDEBUGT << "pinyin out surf:: " << pKPY->surface();
                     InsertTextToCurFocusWt( pKPY->surface() );
                 }
                 pKPY->py_resetToIdleState();
@@ -382,7 +379,7 @@ void XzSoftKeyboard::recKeyClicked(const QString &str)
                 cur_py_text_ = "";
                 lb_display_text_->setText(cur_py_text_);
                 if( pKPY->total_num() > 0 ){
-                    QDEBUGT << "pinyin out zero :: " << pKPY->surface() << pKPY->candidateAt( 0 );
+                    // QDEBUGT << "pinyin out zero :: " << pKPY->surface() << pKPY->candidateAt( 0 );
                     InsertTextToCurFocusWt( pKPY->candidateAt( 0 ) );
                 }
                 pKPY->py_resetToIdleState();
@@ -514,7 +511,7 @@ void XzSoftKeyboard::recKeyClicked(const QString &str)
 
 void XzSoftKeyboard::recKeyClickedSlot()
 {
-    QDEBUGT << qApp->activeWindow();
+    // QDEBUGT << qApp->activeWindow();
     const QPushButton* btn = (QPushButton*)sender();
     const QString &str = btn->text();
     return recKeyClicked(str);
@@ -524,10 +521,7 @@ void XzSoftKeyboard::focusChangedSlot(QWidget *old, QWidget *now)
 {
     Q_UNUSED(old)
 
-    QDEBUGT << "VVVVVVVVVVVVVVVVVVVv";
-    QDEBUGT << "VVVVVVVVVVVVVVVVVVVv";
-    QDEBUGT << "<< now" << now;
-    QDEBUGT << "<< old" << old;
+    QDEBUGT << "<< now" << now << "<< old" << old;
 
 //    QWidget * topWdg1 = nullptr; QWidget * topGet1 = nullptr;
 //    if( old ){
@@ -553,16 +547,16 @@ void XzSoftKeyboard::focusChangedSlot(QWidget *old, QWidget *now)
         topGet = now->parentWidget();
         topWdg = now;
         if( topWdg->inherits("XzSoftKeyboard") ){
-            QDEBUG << "XzSoftKeyboard break" << topWdg;
+            // QDEBUG << "XzSoftKeyboard break" << topWdg;
             return;
         }
         if( topWdg->inherits("QDialog") ){
-            QDEBUG << "QDialog break" << topWdg;
+            // QDEBUG << "QDialog break" << topWdg;
             //this->hide();
             return;
         }
         if( topWdg->inherits("QMainWindow") ){
-            QDEBUG << "QDialog break" << topWdg;
+            // QDEBUG << "QDialog break" << topWdg;
             return;
         }
     }
@@ -571,35 +565,33 @@ void XzSoftKeyboard::focusChangedSlot(QWidget *old, QWidget *now)
     int iYTar = rNowGeo.y() + rNowGeo.height();
 
     while (topGet != nullptr) {
-        QDEBUG << "<< topGet << topWdg" << topGet << topWdg;
+        QDEBUGT << "<< topGet << topWdg" << topGet << topWdg;
         topWdg = topGet;
         if( topWdg->inherits("XzSoftKeyboard") ){
-            QDEBUG << "XzSoftKeyboard break" << topWdg;
+            QDEBUGT << "XzSoftKeyboard break" << topWdg;
             return;
         }
 
         topGet = topGet->parentWidget();
         if( topWdg->inherits("QDialog") ){
-            QDEBUG << "QDialog break" << topWdg;
+            QDEBUGT << "QDialog break" << topWdg;
             break;
         }
         if( topWdg->inherits("QMainWindow") ){
-            QDEBUG << "QMainWindow break" << topWdg;
+            QDEBUGT << "QMainWindow break" << topWdg;
             break;
         }
         if( topWdg->inherits("XzSoftKeyboard") ){
-            QDEBUG << "XzSoftKeyboard break" << topWdg;
+            QDEBUGT << "XzSoftKeyboard break" << topWdg;
             return;
         }
         iXTar += topWdg->geometry().x();
         iYTar += topWdg->geometry().y();
     }
 
-    QDEBUG << "VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV";
-    QDEBUG << "<< topWdg" << topWdg;
-    QDEBUG << "<< now" << now << " " << this->isAncestorOf(now);
-    QDEBUG << "<< now" << now << cur_focus_wt_;
-
+    QDEBUGT << "VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV";
+    QDEBUGT << "<< topWdg" << topWdg << "<< now" << now << " " << this->isAncestorOf(now);
+    QDEBUGT << "<< now " << now << cur_focus_wt_;
 
     bool bShow = false;
     do{
@@ -622,11 +614,7 @@ void XzSoftKeyboard::focusChangedSlot(QWidget *old, QWidget *now)
             }
         }
 
-        QDEBUG << "**************************************";
-
         if( nullptr == cur_focus_wt_ ) break;
-
-        QDEBUG << "**************************************";
 
         if( topWdg != m_top_wdg ){
             this->setParentWdg( topWdg );
@@ -650,23 +638,14 @@ void XzSoftKeyboard::focusChangedSlot(QWidget *old, QWidget *now)
         this->show();
         move(posTar);
         //show(iXTar, iYTar, topWdg);
-        QDEBUGT << iXTar << iYTar << parentWidget() << parent();
+        //QDEBUGT << iXTar << iYTar << parentWidget() << parent();
 
     }while(false);
-    if (nullptr != now && !this->isAncestorOf(now)) {
 
-        if (now->inherits("QWidget")) {
-
-
-            if (nullptr != cur_focus_wt_) {
-
-            }
-
-        }
-    }
     if( nullptr != now ){
         if( ! bShow ){
             this->setParent(nullptr);
+            m_top_wdg = nullptr;
             this->hide();
         }
     }
@@ -687,7 +666,7 @@ bool XzSoftKeyboard::eventFilter(QObject *_obj, QEvent *_event)
         if( _obj == nullptr ) break;
         if( ! _obj->inherits("QWidget") ) break;
 
-        QDEBUG << "bIsXzSoftKeyboard < true ";
+        // QDEBUG << "bIsXzSoftKeyboard < true ";
 
         bool bIsXzSoftKeyboard = false;
         if( _obj->inherits("XzSoftKeyboard") ){ bIsXzSoftKeyboard = true; }
@@ -729,14 +708,6 @@ bool XzSoftKeyboard::eventFilter(QObject *_obj, QEvent *_event)
     return QObject::eventFilter(_obj, _event);
 }
 
-void XzSoftKeyboard::show(int _x, int _y, QObject *_parent)
-{
-    QWidget::show();
-    setParentWdg( reinterpret_cast<QWidget *>(_parent) );
-    raise();
-    move(_x, _y);
-}
-
 void XzSoftKeyboard::setParentWdg(QWidget *_pw)
 {
     //this->setParent(_pw, Qt::Tool | Qt::WindowDoesNotAcceptFocus | Qt::FramelessWindowHint);
@@ -748,13 +719,14 @@ void XzSoftKeyboard::setParentWdg(QWidget *_pw)
     //winFlags |= Qt::WindowStaysOnTopHint;
 
     //winFlags = windowFlags();
+    QDEBUGT << _pw;
     setParent(_pw, m_set_win_flags);
     //setParent( _pw );
 }
 
 void XzSoftKeyboard::show()
 {
-    QDEBUGT << geometry();
+    // QDEBUGT << geometry();
 
     Qt::WindowFlags winFlags = Qt::Widget;// = windowFlags();
     winFlags |= Qt::Tool;
@@ -770,7 +742,6 @@ void XzSoftKeyboard::show()
     QWidget::show();
     QDEBUGT << parentWidget();
     //this->raise();
-    QDEBUGT << parentWidget();
 
     //lb_display_text_->adjustSize();
     //lb_display_text_->move(this->x(), this->y() - lb_display_text_->height());
@@ -779,8 +750,6 @@ void XzSoftKeyboard::show()
 
     QDEBUGT << lb_display_text_->width() << ui->widget_showChinese->width();
 
-
-    QDEBUGT << parentWidget();
     QDEBUGT << windowFlags();
 }
 
@@ -788,6 +757,7 @@ void XzSoftKeyboard::showEvent(QShowEvent *event)
 {
     mode_flag_map_[is_capital_mode] = false;
     setSymbolPage(en0);
+    QDEBUGT << ">>>>>>>>>>>>>>>>>>>>>>parent " << parent() << parentWidget();
     return QWidget::showEvent(event);
 }
 
