@@ -20,6 +20,9 @@ KIT_NAME=$$first(OUT_PWD_LAST_PWD_LIST)
 
 DESTDIR  = $$PWD/../_build/$$KIT_NAME/bin
 
+DEFINES += HAVE_PINYIN
+DEFINES += ___BUILD_MODEL___
+
 
 #message( OUT_PWD_LIST $$OUT_PWD_LIST )
 #message( OUT_PWD $$OUT_PWD size: $$size(OUT_PWD_LIST) )
@@ -28,9 +31,6 @@ DESTDIR  = $$PWD/../_build/$$KIT_NAME/bin
 #message( KIT_NAME $$KIT_NAME )
 
 INCLUDEPATH = $$PWD/include
-
-DEFINES += HAVE_PINYIN
-DEFINES += ___BUILD_MODEL___
 
 SOURCES += \
     $$PWD/command/pinyinime_dictbuilder.cpp

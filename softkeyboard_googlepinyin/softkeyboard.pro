@@ -73,7 +73,11 @@ CONFIG(release, debug|release){
     publish_include = $$PWD/../_publish/$$KIT_NAME/softkeyboard/include
     publish_lib = $$PWD/../_publish/$$KIT_NAME/softkeyboard/lib
 
-    QMAKE_POST_LINK += $$PWD/copy_publish_files.sh $$PWD $$publish_include $$DESTDIR $$publish_lib $$VERSION_APP_LIB $$TARGET
+    QMAKE_POST_LINK += $$PWD/copy_publish_files.sh $$PWD $$publish_include $$DESTDIR $$publish_lib $$VERSION_APP_LIB $$TARGET;
+
+    exists($$PWD/../_publish/$$KIT_NAME/softkeyboard/copy_to_nvrclient.sh){
+        QMAKE_POST_LINK += $$PWD/../_publish/$$KIT_NAME/softkeyboard/copy_to_nvrclient.sh;
+    }
 }
 
 

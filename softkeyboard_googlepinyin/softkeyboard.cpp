@@ -604,6 +604,13 @@ void XzSoftKeyboard::focusChangedSlot(QWidget *old, QWidget *now)
         accept_wts<<"QLineEdit";//哪些类型控件响应键盘
         cur_focus_wt_ = nullptr;
 
+        // 增加QLineEdit的 ReadOnly & Enabled属性检查
+        if(now->inherits("QLineEdit")){
+            QLineEdit * pLE = reinterpret_cast<QLineEdit *>(now);
+            if( pLE->isReadOnly() ) break;
+            if( ! pLE->isEnabled() ) break;
+        }
+
         foreach(QString key , accept_wts) {
             if (now->inherits(key.toUtf8())) {
                 //该控件是否响应键盘,       //setProperty("haveInput", false);表示该控件不响应键盘
